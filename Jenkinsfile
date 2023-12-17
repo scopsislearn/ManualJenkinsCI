@@ -1,15 +1,44 @@
 pipeline{
   agent any
   stages {
-    stage('build'){
+    stage('build and test in Docker'){
       steps{
-        sh 'echo building...'
+        script{
+          docker.image('python:3.8').inside{
+            sh 'pip install -r requirements.txt'
+            sh 'python -m unittest'
+          }
+        }
       }
     }
-    stage('Test'){
+    stage('Post-Merge Action'){
+      when {
+        branch 'main'
+      }
       steps{
-        sh 'python -m unittest'
+        echo 'Any test you desire to do post merge'
       }
     }
   }
+
+  post{
+    always{
+      echo 'This will alwyas run regardless of the outcome'
+    }
+    success{
+      echo 'Build was Successful!'
+    }
+    failure{
+      echo 'Build Failed!'
+    } 
+  }
 }
+
+
+
+
+
+
+
+
+    
